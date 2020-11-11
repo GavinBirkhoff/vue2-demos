@@ -254,6 +254,99 @@ Vue 在插入、更新或者移除 DOM 时，提供多种不同方式的应用�
 
 ## 自定义指令
 
+# VUE源码分析
+
+版本2.6.12
+
+## Vue构造函数的加工
+
+**在Vue原型上和Vue静态上**
+
+创建vue的构造函数,然后通过init,state,events,lifecyle,rendeer的混入.
+
+```js
+function Vue (options) {
+  if (process.env.NODE_ENV !== 'production' &&
+    !(this instanceof Vue)
+  ) {
+    warn('Vue is a constructor and should be called with the `new` keyword')
+  }
+  this._init(options)
+}
+
+initMixin(Vue)
+stateMixin(Vue)
+eventsMixin(Vue)
+lifecycleMixin(Vue)
+renderMixin(Vue)
+
+export default Vue
+```
+
+initMixin仅在Vue.prototype上添加了_init()
+
+stateMixin首先在Vue.prototype上定义了\$data and \$props,设置了getter返回实例的\_data和\_props
+
+接着声明了$set 和 \$delete 为set和del 他们来自observer文件中的方法定义
+
+接着声明了$watch
+
+稍后会探索具体函数内容,以上简单来看就是在Vue原型上添加了$ data props set delete watch
+
+eventsMixin在Vue的prototype上添加了$on once off emit
+
+lifecycleMixin在Vue的prototype上添加了_update $forceUpdate \$destroy
+
+renderMixin首先在Vue的prototype上添加了
+
+```js
+  target._o = markOnce
+  target._n = toNumber
+  target._s = toString
+  target._l = renderList
+  target._t = renderSlot
+  target._q = looseEqual
+  target._i = looseIndexOf
+  target._m = renderStatic
+  target._f = resolveFilter
+  target._k = checkKeyCodes
+  target._b = bindObjectProps
+  target._v = createTextVNode
+  target._e = createEmptyVNode
+  target._u = resolveScopedSlots
+  target._g = bindObjectListeners
+  target._d = bindDynamicKeys
+  target._p = prependModifier
+```
+
+接着添加了$nextTick 和 _render
+
+## Vue的_init
+
+性能mark以后说
+
+首先说下
+
+```js
+      vm.$options = mergeOptions(
+        resolveConstructorOptions(vm.constructor),
+        options || {},
+        vm
+      )
+```
+
+把创建Vue实例的options和Vue的options合成一个options保存在$options上
+
+接着在开发模式设置了vm._renderProxy 代理vm
+
+vm._self = vm
+
+initLifecycle 给vm添加了$parent root children refs _watcher inactive directInactive isMounted isDestroyed isBeingDestroyed
+
+initEvents vm添加了_events _hasHookEvent
+
+# VUE单独文件
+
 Project setup
 ```
 yarn install
